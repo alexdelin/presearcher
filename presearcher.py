@@ -182,4 +182,16 @@ class PresearcherEnv(object):
 
     def get_top_content(self, profile_name):
         # Get top content for a specific profile
-        pass
+
+        all_content = self._read_file(self.content_file_path)
+        content_list = []
+        profile_key = 'profile_{}'.format(profile_name)
+
+        for content_id, content_data in all_content.iteritems():
+
+            profile_score = content_data.get(profile_key)
+            if profile_score:
+                content_list.append(content_data)
+
+        sorted_content = sorted(content_list, key=lambda k: k[profile_key])
+        return sorted_content
