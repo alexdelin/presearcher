@@ -8,13 +8,15 @@ app = Flask(__name__)
 env = PresearcherEnv()
 
 
+# ----- Main Web App Routes -----
+
 @app.route('/')
 def show_ui():
     return 'The UI goes here!'
 
 
-@app.route('/content/<profile:profile>', methods=['GET'])
-def get_content(profile):
+@app.route('/content/', methods=['GET'])
+def get_content():
     # Gets recommended content for a given profile
     return []
 
@@ -45,3 +47,16 @@ def send_feedback():
     env.add_feedback(profile_name, feedback_type, content)
 
     return 'Success'
+
+
+# ----- Administration Routes -----
+
+@app.route('/fetch')
+def fetch_content():
+    # fetch updated content from all subscriptions
+    env.update_content()
+    return 'Success!'
+
+
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=8080, debug=True)
