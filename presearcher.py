@@ -2,8 +2,10 @@ import os
 import json
 from time import mktime
 from datetime import datetime
+from random import shuffle
 
 import feedparser
+from model import PresearcherModel
 
 
 class PresearcherEnv(object):
@@ -22,7 +24,14 @@ class PresearcherEnv(object):
         self.content_file_path = self.data_dir + 'content.json'
         self.ensure_file(self.content_file_path, {})
 
-        self.model_cache = None
+        self.model_data_dir = self.data_dir + 'model_data/'
+        self.ensure_dir(self.model_data_dir)
+        self.model = PresearcherModel(data_dir=self.model_data_dir)
+
+    def ensure_dir(self, dir):
+
+        if not os.path.exists(dir):
+            os.makedirs(dir)
 
     def ensure_file(self, file_path, default_contents):
 
@@ -77,39 +86,55 @@ class PresearcherEnv(object):
             current_profiles.append(new_profile)
             self._write_file(self.profiles_file_path, current_profiles)
 
+            feedback_filename = self.data_dir + profile_name + '_feedback.json'
+            self.ensure_file(feedback_filename, [])
+
         else:
             raise ValueError('The profile {name} already exists!'.format(
                                 name=new_profile))
 
     def add_feedback(self, profile_name, feedback_type, content):
-        # Store feedback on suggested content
+        ''' Store feedback on suggested content
+        content is a dictionary with all the relevant fields included
+        feedback_type is either "pos" or "neg"
+        '''
 
         feedback_filename = self.data_dir + profile_name + '_feedback.json'
-        self.ensure_file(feedback_filename, {"pos": [], "neg": []})
+        self.ensure_file(feedback_filename, [])
 
         feedback = self._read_file(feedback_filename)
-        if feedback_type == 'pos':
-            feedback['pos'].append(content)
-        elif feedback_type == 'neg':
-            feedback['neg'].append(content)
+        if feedback_type in ['pos', 'neg']:
+            feedback.append({
+                "label": feedback_type,
+                "content": content
+            })
+
         else:
             raise ValueError('Invalid Feedback Type {}'.format(feedback_type))
 
+        self._write_file(feedback_filename, feedback)
+
     def update_content(self):
-        # Fetch Additional Content for all subscriptions
-        # Update the content file
-        # Remove content that is too old based on the time window
+        ''' Fetch Additional Content for all subscriptions
+        Update the content file
+        Remove content that is too old based on the time window
+        '''
 
         current_content = self._read_file(self.content_file_path)
         all_subscriptions = self._read_file(self.subscriptions_file_path)
 
+        print 'Updating Content'
+
         # Get updated content for every subscription
         for subscription in all_subscriptions:
 
-            sub_content = self.parse_feed(subscription)
-            for item in sub_content:
+            print 'updating subscription ' + subscription
+
+            subscription_content = self.parse_feed(subscription)
+            for item in subscription_content:
 
                 if not item.get('link'):
+                    print 'No Link!!!'
                     continue
 
                 if item['link'] not in current_content.keys():
@@ -126,6 +151,7 @@ class PresearcherEnv(object):
             days_elapsed = time_elapsed.days
 
             if days_elapsed >= self.time_window:
+                print 'Item too Old!!!'
                 old_content.append(item_id)
 
         for item in old_content:
@@ -160,9 +186,11 @@ class PresearcherEnv(object):
             else:
                 parsed_item['timestamp'] = datetime.now().isoformat()[:19]
 
+            feed_items.append(parsed_item)
+
         return feed_items
 
-    def score_fetched_content(self):
+    def rescore_all_profiles(self):
         # Do per-profile scoring on all fetched content
 
         profile_list = self._read_file(self.profiles_file_path)
@@ -174,7 +202,18 @@ class PresearcherEnv(object):
     def train_from_feedback(self, profile_name):
         # Train the model from the feedback received
         # Remove all previous training
-        pass
+
+        profile_list = self._read_file(self.profiles_file_path)
+        if profile_name not in profile_list:
+            raise ValueError('Profile {} does not exist'.format(profile_name))
+
+        feedback_filename = self.data_dir + profile_name + '_feedback.json'
+        training_content = self._read_file(feedback_filename)
+        shuffle(training_content)
+
+        self.model.train(training_content)
+        print 'Successfully trained on {} examples'.format(
+                len(training_content))
 
     def rescore_profile(self, profile_name):
         # Rescore the fetched content for a given profile
