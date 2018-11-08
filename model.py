@@ -82,9 +82,18 @@ class PresearcherModel(object):
         self.label_mapper = LabelMapStep(data_dir=self.data_dir)
         self.classifier = SGDClassifier()
 
+    def extract_fields(self, examples):
+        ''' Extract relevant fields from content objects
+        '''
+
+        return [example.get('title', '') + ' ' +
+                example.get('description', '') for
+                example in examples]
+
     def train(self, training_data):
 
-        samples = [example['text'] for example in training_data]
+        samples = self.extract_fields(
+                    [example['content'] for example in training_data])
         labels = [example['label'] for example in training_data]
 
         self.embedder.fit(samples)
@@ -100,6 +109,8 @@ class PresearcherModel(object):
         self.classifier.train(selected_embeddings, label_indexes)
 
     def predict(self, samples):
+
+        samples = self.extract_fields(samples)
 
         # TODO Pre-check that we are ready
         embeddings = self.embedder.process(samples)
