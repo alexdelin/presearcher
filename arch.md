@@ -69,14 +69,33 @@ Storage for feedback received on articles presented. Used for re-training models
 Contents:
 
 ```json
-{
-    "pos": [
-        "Something that this user loved reading"
-    ],
-    "neg": [
-        "An article that the user did not enjoy reading about"
-    ]
-}
+[
+    {
+        "label": "pos",
+        "content": {
+            "title": "A Bi-layered Parallel Training Architecture for Large-scale Convolutional Neural Networks.",
+            "description": "Benefitting from large-scale training datasets and the complex training network, ... improves the training performance of CNNs while maintaining the accuracy.",
+            "timestamp": "2018-10-17T10:07:31",
+            "link": "http://arxiv.org/abs/1810.07742",
+            "authors": [
+                "Jianguo Chen",
+                "Kashif Bilal",
+                // ...
+                "Philip S. Yu"
+            ]
+        }
+    },
+
+    // ...
+
+    {
+        "label": "neg",
+        "content": {
+            "title": "Methods of identifying animals from instagram photos"
+            // ...
+        }
+    }
+]
 ```
 
 
@@ -112,10 +131,12 @@ Storage for all content fetched from the subscriptions that was published within
             // ...
             "Philip S. Yu"
         ],
-        "profile_alex": 0.71,
-        "profile_john": 0.29,
-        // ...
-        "profile_sam": 0.97
+        "profiles": {
+            "alex": 0.71,
+            "john": 0.29,
+            // ...
+            "sam": 0.97
+        }
     }
 }
 ```
