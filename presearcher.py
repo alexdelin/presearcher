@@ -1,68 +1,33 @@
 import os
-import json
 from time import mktime
 from datetime import datetime
 from random import shuffle
 
 import feedparser
+
 from model import PresearcherModel
+from utils import ensure_dir, ensure_file, _read_file, _write_file, get_env_config
 
 
 class PresearcherEnv(object):
 
     def __init__(self, config_file='~/.presearcher.json'):
 
-        self.env_config = self.get_env_config(config_file)
+        self.env_config = get_env_config(config_file)
         self.data_dir = self.get_data_dir()
         self.time_window = self.env_config.get('time_window', 14)
 
         # Easy access to commonly used files
         self.profiles_file_path = self.data_dir + 'profiles.json'
-        self.ensure_file(self.profiles_file_path, [])
+        ensure_file(self.profiles_file_path, [])
         self.subscriptions_file_path = self.data_dir + 'subscriptions.json'
-        self.ensure_file(self.subscriptions_file_path, [])
+        ensure_file(self.subscriptions_file_path, [])
         self.content_file_path = self.data_dir + 'content.json'
-        self.ensure_file(self.content_file_path, {})
+        ensure_file(self.content_file_path, {})
 
         self.model_data_dir = self.data_dir + 'model_data/'
-        self.ensure_dir(self.model_data_dir)
+        ensure_dir(self.model_data_dir)
         self.model = PresearcherModel(data_dir=self.model_data_dir)
-
-    def ensure_dir(self, dir):
-
-        if not os.path.exists(dir):
-            os.makedirs(dir)
-
-    def ensure_file(self, file_path, default_contents):
-
-        if not os.path.exists(os.path.dirname(file_path)):
-            os.makedirs(os.path.dirname(file_path))
-
-        if not os.path.exists(file_path):
-            with open(file_path, 'w') as file_object:
-                json.dump(default_contents, file_object)
-
-    def _read_file(self, file_path):
-
-        with open(file_path, 'r') as file_object:
-            contents = json.load(file_object)
-
-        return contents
-
-    def _write_file(self, file_path, file_contents):
-
-        with open(file_path, 'w') as file_object:
-            json.dump(file_contents, file_object)
-
-    def get_env_config(self, config_location='~/.presearcher.json'):
-
-        if '~' in config_location:
-            config_location = os.path.expanduser(config_location)
-
-        with open(config_location, 'r') as env_config_file:
-            env_config = json.load(env_config_file)
-
-        return env_config
 
     def get_data_dir(self):
 
@@ -78,16 +43,17 @@ class PresearcherEnv(object):
 
     def add_profile(self, profile_name):
 
-        current_profiles = self._read_file(self.profiles_file_path)
+        current_profiles = _read_file(self.profiles_file_path)
 
         new_profile = profile_name.lower().replace(' ', '-')
 
         if new_profile not in current_profiles:
             current_profiles.append(new_profile)
-            self._write_file(self.profiles_file_path, current_profiles)
+            _write_file(self.profiles_file_path, current_profiles)
 
-            feedback_filename = self.data_dir + profile_name + '_feedback.json'
-            self.ensure_file(feedback_filename, [])
+            feedback_filename = '{base}feedback/{profile}.json'.format(
+                                    base=self.data_dir, profile=profile_name)
+            ensure_file(feedback_filename, [])
 
         else:
             raise ValueError('The profile {name} already exists!'.format(
@@ -99,10 +65,11 @@ class PresearcherEnv(object):
         feedback_type is either "pos" or "neg"
         '''
 
-        feedback_filename = self.data_dir + profile_name + '_feedback.json'
-        self.ensure_file(feedback_filename, [])
+        feedback_filename = '{base}feedback/{profile}.json'.format(
+                                    base=self.data_dir, profile=profile_name)
+        ensure_file(feedback_filename, [])
 
-        feedback = self._read_file(feedback_filename)
+        feedback = _read_file(feedback_filename)
         if feedback_type in ['pos', 'neg']:
             feedback.append({
                 "label": feedback_type,
@@ -112,7 +79,7 @@ class PresearcherEnv(object):
         else:
             raise ValueError('Invalid Feedback Type {}'.format(feedback_type))
 
-        self._write_file(feedback_filename, feedback)
+        _write_file(feedback_filename, feedback)
 
     def update_content(self):
         ''' Fetch Additional Content for all subscriptions
@@ -120,8 +87,8 @@ class PresearcherEnv(object):
         Remove content that is too old based on the time window
         '''
 
-        current_content = self._read_file(self.content_file_path)
-        all_subscriptions = self._read_file(self.subscriptions_file_path)
+        current_content = _read_file(self.content_file_path)
+        all_subscriptions = _read_file(self.subscriptions_file_path)
 
         print 'Updating Content'
 
@@ -158,7 +125,7 @@ class PresearcherEnv(object):
             del current_content[item]
 
         # Write updated content to file
-        self._write_file(self.content_file_path, current_content)
+        _write_file(self.content_file_path, current_content)
 
     def parse_feed(self, feed_url):
         # Parse content from an external RSS Feed
@@ -193,7 +160,7 @@ class PresearcherEnv(object):
     def rescore_all_profiles(self):
         # Do per-profile scoring on all fetched content
 
-        profile_list = self._read_file(self.profiles_file_path)
+        profile_list = _read_file(self.profiles_file_path)
 
         for profile in profile_list:
             print('Rescoring profile {}'.format(profile))
@@ -204,12 +171,17 @@ class PresearcherEnv(object):
         # Train the model from the feedback received
         # Remove all previous training
 
-        profile_list = self._read_file(self.profiles_file_path)
+        profile_list = _read_file(self.profiles_file_path)
         if profile_name not in profile_list:
             raise ValueError('Profile {} does not exist'.format(profile_name))
 
-        feedback_filename = self.data_dir + profile_name + '_feedback.json'
-        training_content = self._read_file(feedback_filename)
+        feedback_filename = '{base}feedback/{profile}.json'.format(
+                                    base=self.data_dir, profile=profile_name)
+        try:
+            training_content = _read_file(feedback_filename)
+        except (OSError, IOError):
+            raise ValueError('No Feedback file found for profile {}'.format(
+                                profile_name))
         shuffle(training_content)
 
         self.model.train(training_content)
@@ -219,29 +191,39 @@ class PresearcherEnv(object):
     def rescore_profile(self, profile_name):
         # Rescore the fetched content for a given profile
 
-        content_set = self._read_file(self.content_file_path)
-        new_content = []
+        full_content = _read_file(self.content_file_path)
+        content_links, content_data = [], []
 
-        predictions = self.model.predict(content_set)
+        for link, data in full_content.iteritems():
+            content_links.append(link)
+            content_data.append(data)
 
-        for prediction, content in zip(predictions, content_set):
+        new_content = {}
+
+        predictions = self.model.predict(content_data)
+
+        for prediction, link, content in zip(predictions, content_links, content_data):
+            content.setdefault('profiles', {})
             content['profiles'][profile_name] = prediction['pos']
-            new_content.append(content)
+            new_content[link] = content
 
-        self._write_file(self.content_file_path, new_content)
+        _write_file(self.content_file_path, new_content)
 
     def get_top_content(self, profile_name):
         # Get top content for a specific profile
 
-        all_content = self._read_file(self.content_file_path)
+        all_content = _read_file(self.content_file_path)
         content_list = []
-        profile_key = 'profile_{}'.format(profile_name)
 
         for content_id, content_data in all_content.iteritems():
 
-            profile_score = content_data.get(profile_key)
+            profile_score = content_data.get('profiles', {}).get(profile_name, 0)
             if profile_score:
                 content_list.append(content_data)
 
-        sorted_content = sorted(content_list, key=lambda k: k[profile_key])
+        sorted_content = sorted(content_list,
+                                key=lambda k: k.get(
+                                        'profiles', {}).get(
+                                            profile_name, 0),
+                                reverse=True)
         return sorted_content

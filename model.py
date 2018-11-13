@@ -80,7 +80,7 @@ class PresearcherModel(object):
                                         ngram_range=[1, 2],
                                         strip_accents='unicode')
         self.label_mapper = LabelMapStep(data_dir=self.data_dir)
-        self.classifier = SGDClassifier()
+        self.classifier = SGDClassifier(loss="log")
 
     def extract_fields(self, examples):
         ''' Extract relevant fields from content objects
@@ -97,7 +97,7 @@ class PresearcherModel(object):
         labels = [example['label'] for example in training_data]
 
         self.embedder.fit(samples)
-        embeddings = self.embedder.process(samples)
+        embeddings = self.embedder.transform(samples)
 
         self.selector = SelectKBest(f_classif, k=min(20000, embeddings.shape[1]))
         self.selector.fit(embeddings, labels)
@@ -106,19 +106,19 @@ class PresearcherModel(object):
         self.label_map = self.label_mapper.train(labels)
         label_indexes = self.label_mapper.process(labels)
 
-        self.classifier.train(selected_embeddings, label_indexes)
+        self.classifier.fit(selected_embeddings, label_indexes)
 
     def predict(self, samples):
 
         samples = self.extract_fields(samples)
 
         # TODO Pre-check that we are ready
-        embeddings = self.embedder.process(samples)
+        embeddings = self.embedder.transform(samples)
 
         selected_embeddings = self.selector.transform(embeddings).astype('float32')
-        predictions = self.classifier.process(selected_embeddings)
+        predictions = self.classifier.predict_proba(selected_embeddings)
 
-        classes = self.classifier.clf.classes_
+        classes = self.classifier.classes_
         formatted = self.label_mapper.format_predictions(predictions, classes)
 
         return formatted

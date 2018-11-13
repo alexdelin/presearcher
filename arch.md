@@ -62,7 +62,7 @@ Contents:
 ```
 
 
-# `<Profile-Name>_feedback.json` file structure
+# `feedback/<Profile-Name>.json` file structure
 
 Storage for feedback received on articles presented. Used for re-training models for specific profiles
 

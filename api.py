@@ -1,5 +1,7 @@
 #! /usr/bin/env/python
 
+import json
+
 from flask import Flask, request
 
 from presearcher import PresearcherEnv
@@ -15,10 +17,10 @@ def show_ui():
     return 'The UI goes here!'
 
 
-@app.route('/content/', methods=['GET'])
-def get_content():
+@app.route('/content/<profile_name>', methods=['GET'])
+def get_content(profile_name):
     # Gets recommended content for a given profile
-    return []
+    return json.dumps(env.get_top_content(profile_name))
 
 
 @app.route('/profiles', methods=['GET'])
@@ -55,6 +57,13 @@ def send_feedback():
 def fetch_content():
     # fetch updated content from all subscriptions
     env.update_content()
+    return 'Success!'
+
+
+@app.route('/score')
+def rescore():
+    # fetch updated content from all subscriptions
+    env.rescore_all_profiles()
     return 'Success!'
 
 
