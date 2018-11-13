@@ -196,6 +196,7 @@ class PresearcherEnv(object):
         profile_list = self._read_file(self.profiles_file_path)
 
         for profile in profile_list:
+            print('Rescoring profile {}'.format(profile))
             self.train_from_feedback(profile)
             self.rescore_profile(profile)
 
@@ -217,7 +218,17 @@ class PresearcherEnv(object):
 
     def rescore_profile(self, profile_name):
         # Rescore the fetched content for a given profile
-        pass
+
+        content_set = self._read_file(self.content_file_path)
+        new_content = []
+
+        predictions = self.model.predict(content_set)
+
+        for prediction, content in zip(predictions, content_set):
+            content['profiles'][profile_name] = prediction['pos']
+            new_content.append(content)
+
+        self._write_file(self.content_file_path, new_content)
 
     def get_top_content(self, profile_name):
         # Get top content for a specific profile
