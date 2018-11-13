@@ -45,7 +45,7 @@ class PresearcherEnv(object):
         with open(file_path, 'w') as file_object:
             json.dump(file_contents, file_object)
 
-    def get_env_config(self, config_location='~/.classer.json'):
+    def get_env_config(self, config_location='~/.presearcher.json'):
 
         if '~' in config_location:
             config_location = os.path.expanduser(config_location)
