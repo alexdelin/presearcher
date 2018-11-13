@@ -54,7 +54,7 @@ class PresearcherEnv(object):
         with open(file_path, 'w') as file_object:
             json.dump(file_contents, file_object)
 
-    def get_env_config(self, config_location='~/.classer.json'):
+    def get_env_config(self, config_location='~/.presearcher.json'):
 
         if '~' in config_location:
             config_location = os.path.expanduser(config_location)
@@ -196,6 +196,7 @@ class PresearcherEnv(object):
         profile_list = self._read_file(self.profiles_file_path)
 
         for profile in profile_list:
+            print('Rescoring profile {}'.format(profile))
             self.train_from_feedback(profile)
             self.rescore_profile(profile)
 
@@ -217,8 +218,30 @@ class PresearcherEnv(object):
 
     def rescore_profile(self, profile_name):
         # Rescore the fetched content for a given profile
-        pass
+
+        content_set = self._read_file(self.content_file_path)
+        new_content = []
+
+        predictions = self.model.predict(content_set)
+
+        for prediction, content in zip(predictions, content_set):
+            content['profiles'][profile_name] = prediction['pos']
+            new_content.append(content)
+
+        self._write_file(self.content_file_path, new_content)
 
     def get_top_content(self, profile_name):
         # Get top content for a specific profile
-        pass
+
+        all_content = self._read_file(self.content_file_path)
+        content_list = []
+        profile_key = 'profile_{}'.format(profile_name)
+
+        for content_id, content_data in all_content.iteritems():
+
+            profile_score = content_data.get(profile_key)
+            if profile_score:
+                content_list.append(content_data)
+
+        sorted_content = sorted(content_list, key=lambda k: k[profile_key])
+        return sorted_content
