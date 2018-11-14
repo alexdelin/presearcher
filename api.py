@@ -20,13 +20,16 @@ def show_ui():
 @app.route('/content/<profile_name>', methods=['GET'])
 def get_content(profile_name):
     # Gets recommended content for a given profile
-    return json.dumps(env.get_top_content(profile_name))
+    limit = request.args.get('limit', 20)
+    start = request.args.get('start', 0)
+    top_content = env.get_top_content(profile_name, limit, start)
+    return json.dumps(top_content)
 
 
 @app.route('/profiles', methods=['GET'])
 def get_profiles():
     # Get names of all available Profiles
-    return env.get_profiles()
+    return json.dumps(env.get_profiles())
 
 
 @app.route('/profiles', methods=['POST'])
@@ -37,18 +40,18 @@ def create_profile():
     return 'Success'
 
 
-@app.route('/feedback')
+@app.route('/feedback', methods=['POST'])
 def send_feedback():
     # Send feedback on a document
     request_data = request.get_json(force=True)
 
-    profile_name = request_data('profile_name')
-    feedback_type = request_data('feedback_type')
+    profile_name = request_data.get('profile_name')
+    feedback_type = request_data.get('feedback_type')
     content = request_data.get('content')
 
     env.add_feedback(profile_name, feedback_type, content)
 
-    return 'Success'
+    return 'Success!'
 
 
 # ----- Administration Routes -----

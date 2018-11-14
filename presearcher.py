@@ -4,6 +4,7 @@ from datetime import datetime
 from random import shuffle
 
 import feedparser
+import six
 
 from model import PresearcherModel
 from utils import ensure_dir, ensure_file, _read_file, _write_file, get_env_config
@@ -40,6 +41,11 @@ class PresearcherEnv(object):
             data_dir += '/'
 
         return data_dir
+
+    def get_profiles(self):
+
+        profile_list = _read_file(self.profiles_file_path)
+        return profile_list
 
     def add_profile(self, profile_name):
 
@@ -90,18 +96,18 @@ class PresearcherEnv(object):
         current_content = _read_file(self.content_file_path)
         all_subscriptions = _read_file(self.subscriptions_file_path)
 
-        print 'Updating Content'
+        print('Updating Content')
 
         # Get updated content for every subscription
         for subscription in all_subscriptions:
 
-            print 'updating subscription ' + subscription
+            print('updating subscription ' + subscription)
 
             subscription_content = self.parse_feed(subscription)
             for item in subscription_content:
 
                 if not item.get('link'):
-                    print 'No Link!!!'
+                    print('No Link!!!')
                     continue
 
                 if item['link'] not in current_content.keys():
@@ -110,7 +116,7 @@ class PresearcherEnv(object):
         # Remove content that is too old
         old_content = []
 
-        for item_id, item_content in current_content.iteritems():
+        for item_id, item_content in six.iteritems(current_content):
 
             item_pub = item_content.get('timestamp')
             pub_date = datetime.strptime(item_pub, '%Y-%m-%dT%H:%M:%S')
@@ -118,7 +124,7 @@ class PresearcherEnv(object):
             days_elapsed = time_elapsed.days
 
             if days_elapsed >= self.time_window:
-                print 'Item too Old!!!'
+                print('Item too Old!!!')
                 old_content.append(item_id)
 
         for item in old_content:
@@ -185,8 +191,8 @@ class PresearcherEnv(object):
         shuffle(training_content)
 
         self.model.train(training_content)
-        print 'Successfully trained on {} examples'.format(
-                len(training_content))
+        print('Successfully trained on {} examples'.format(
+                        len(training_content)))
 
     def rescore_profile(self, profile_name):
         # Rescore the fetched content for a given profile
@@ -194,7 +200,7 @@ class PresearcherEnv(object):
         full_content = _read_file(self.content_file_path)
         content_links, content_data = [], []
 
-        for link, data in full_content.iteritems():
+        for link, data in six.iteritems(full_content):
             content_links.append(link)
             content_data.append(data)
 
@@ -209,21 +215,29 @@ class PresearcherEnv(object):
 
         _write_file(self.content_file_path, new_content)
 
-    def get_top_content(self, profile_name):
+    def get_top_content(self, profile_name, limit=20, start=0):
         # Get top content for a specific profile
 
         all_content = _read_file(self.content_file_path)
         content_list = []
 
-        for content_id, content_data in all_content.iteritems():
+        for content_id, content_data in six.iteritems(all_content):
 
-            profile_score = content_data.get('profiles', {}).get(profile_name, 0)
-            if profile_score:
-                content_list.append(content_data)
+            content_list.append(content_data)
 
         sorted_content = sorted(content_list,
                                 key=lambda k: k.get(
                                         'profiles', {}).get(
                                             profile_name, 0),
                                 reverse=True)
+
+        if start > len(sorted_content):
+            # Early exit for invalid start index
+            return []
+
+        if start + limit < len(sorted_content):
+            sorted_content = sorted_content[start:start + limit]
+        else:
+            sorted_content = sorted_content[start:]
+
         return sorted_content
