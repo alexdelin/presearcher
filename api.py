@@ -2,7 +2,7 @@
 
 import json
 
-from flask import Flask, request
+from flask import Flask, request, render_template, send_from_directory
 
 from presearcher import PresearcherEnv
 
@@ -10,11 +10,35 @@ app = Flask(__name__)
 env = PresearcherEnv()
 
 
-# ----- Main Web App Routes -----
+# ----- UI + Web Content Routes -----
 
 @app.route('/')
 def show_ui():
-    return 'The UI goes here!'
+    profile_list = env.get_profiles()
+    return render_template('index.j2', profiles=profile_list)
+
+
+@app.route('/new_profile')
+def new_profile():
+    return render_template('new_profile.j2')
+
+
+@app.route('/js/<path:path>', methods=['GET', 'POST'])
+def send_js(path):
+    return send_from_directory('ui/js', path)
+
+
+@app.route('/css/<path:path>', methods=['GET', 'POST'])
+def send_css(path):
+    return send_from_directory('ui/css', path)
+
+
+@app.route('/img/<path:path>', methods=['GET', 'POST'])
+def send_img(path):
+    return send_from_directory('ui/img', path)
+
+
+# ----- Main Web App Routes -----
 
 
 @app.route('/content/<profile_name>', methods=['GET'])

@@ -2,7 +2,7 @@
 
 * `<Data-Dir>`
   * `profiles.json`
-  * `<Profile-Name>_feedback.json`
+  * `feedback/<Profile-Name>.json`
   * `subscriptions.json`
   * `content.json`
 
