@@ -32,9 +32,8 @@
     vertical-align: middle;
 }
 
-#status-window {
-    background-color: #aaa;
-    height: 250px;
+#results-container {
+    min-height: 1000px;
 }
 
 .content-recommendation {

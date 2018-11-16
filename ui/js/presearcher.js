@@ -7,7 +7,7 @@ function get_content_element(title, description, score) {
                 ITEM_TITLE
             </h5>
         </div>
-        <div class="row">
+        <div class="card-body row">
             <div class="card-text col-md-8">
                 ITEM_DESCRIPTION
             </div>
