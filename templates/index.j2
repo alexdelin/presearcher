@@ -25,35 +25,28 @@
             </div>
         </div>
 
-        <div class="row">
+        <div class="row top-buttons">
 
             <div class="col-md-10">
 
-                <form class="form-horizontal">
-                    <div class="form-group">
-                        <label for="profileSelected" class="col-sm-2 control-label">Profile:</label>
-                        <div class="col-sm-4">
-                            <select class="form-control" id="profileSelected">
-                                {% for profile in profiles%}
-                                    <option>{{ profile }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </div>
+                <form class="form-inline">
+
+                    <label for="profileSelected" class="control-label mb-2 mr-sm-2">Profile:</label>
+                    <select class="form-control mb-2 mr-sm-2" id="profileSelected">
+                        {% for profile in profiles%}
+                            <option>{{ profile }}</option>
+                        {% endfor %}
+                    </select>
+                    <button id="fetchSubmit" type="button" class="btn btn-primary mb-2 mr-sm-2">Fetch!</button>
+
                 </form>
 
             </div>
 
             <div class="col-md-2">
 
-                <a class="btn btn-default" href="new_profile" role="button">Create Profile</a>
+                <a class="btn btn-outline-secondary" href="new_profile" role="button">Create Profile</a>
 
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-12">
-                <div id="fetchSubmit" class="btn btn-default">Fetch!</div>
             </div>
         </div>
 

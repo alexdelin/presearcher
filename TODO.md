@@ -7,3 +7,4 @@
 * Implement feedback UI Element
 * Wire up Create profile UI
 * Add UI Button for re-scoring
+* Replace card element building with an underscore template
