@@ -8,7 +8,7 @@ import six
 
 from model import PresearcherModel
 from utils import ensure_dir, ensure_file, _read_file, _write_file, \
-                  get_env_config
+                  get_env_config, cleanup_title
 
 
 class PresearcherEnv(object):
@@ -143,7 +143,7 @@ class PresearcherEnv(object):
         for item in feed['items']:
 
             parsed_item = {
-                "title": item.get('title'),
+                "title": cleanup_title(item.get('title')),
                 "description": item.get('summary'),
                 "link": item.get('link')
             }

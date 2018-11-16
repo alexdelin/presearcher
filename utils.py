@@ -1,5 +1,6 @@
 import os
 import json
+import re
 
 
 def ensure_dir(dir):
@@ -41,3 +42,9 @@ def get_env_config(config_location='~/.presearcher.json'):
         env_config = json.load(env_config_file)
 
     return env_config
+
+
+def cleanup_title(title):
+
+    title = re.sub(string=title, pattern=r'\(arXiv:.*?\)', repl='')
+    return title
