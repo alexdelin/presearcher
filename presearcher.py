@@ -171,8 +171,9 @@ class PresearcherEnv(object):
 
         for profile in profile_list:
             print('Rescoring profile {}'.format(profile))
-            self.train_from_feedback(profile)
-            self.rescore_profile(profile)
+            error = self.train_from_feedback(profile)
+            if not error:
+                self.rescore_profile(profile)
 
     def train_from_feedback(self, profile_name):
         # Train the model from the feedback received
@@ -191,9 +192,17 @@ class PresearcherEnv(object):
                                 profile_name))
         shuffle(training_content)
 
+        if not training_content:
+            print('Skipping profile {} because it '
+                  'has no training content'.format(
+                    profile_name))
+            return True
+
         self.model.train(training_content)
         print('Successfully trained on {} examples'.format(
                         len(training_content)))
+
+        return False
 
     def rescore_profile(self, profile_name):
         # Rescore the fetched content for a given profile
