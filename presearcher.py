@@ -7,7 +7,8 @@ import feedparser
 import six
 
 from model import PresearcherModel
-from utils import ensure_dir, ensure_file, _read_file, _write_file, get_env_config
+from utils import ensure_dir, ensure_file, _read_file, _write_file, \
+                  get_env_config
 
 
 class PresearcherEnv(object):
@@ -223,12 +224,13 @@ class PresearcherEnv(object):
 
         for content_id, content_data in six.iteritems(all_content):
 
+            content_data['score'] = content_data.get('profiles', {}).get(
+                                                        profile_name, 0)
             content_list.append(content_data)
 
         sorted_content = sorted(content_list,
                                 key=lambda k: k.get(
-                                        'profiles', {}).get(
-                                            profile_name, 0),
+                                        'score', 0),
                                 reverse=True)
 
         if start > len(sorted_content):

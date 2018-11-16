@@ -1,24 +1,26 @@
-function get_content_element(title, description, rating) {
+function get_content_element(title, description, score) {
     /* Logic to Draw an HTML Content element from the relevant details
     Sample:
-    <div class="content-recommendation row">
-        <div class="content-title col-md-12">
-            ITEM_TITLE
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">
+                ITEM_TITLE
+            </h5>
         </div>
-    </div>
-    <div class="row">
-        <div class="content-description col-md-8">
-            ITEM_DESCRIPTION
-        </div>
-        <div class="content-rating col-md-2">
-            RATING
-        </div>
-        <div class="content-feedback col-md-2">
-            FEEDBACK
+        <div class="row">
+            <div class="card-text col-md-8">
+                ITEM_DESCRIPTION
+            </div>
+            <div class="content-score col-md-2">
+                SCORE
+            </div>
+            <div class="content-feedback col-md-2">
+                FEEDBACK
+            </div>
         </div>
     </div>
     */
-    return '<div class="content-recommendation row"><div class="content-title col-md-12">' + title + '</div></div><div class="row"><div class="content-description col-md-8">' + description + '</div><div class="content-rating col-md-2">' + rating + '</div><div class="content-feedback col-md-2">' + 'FEEDBACK' + '</div></div>'
+    return '<div class="card"><div class="card-body"><h5 class="card-title">' + title + '</h5></div><div class="card-body row"><div class="card-text col-md-8">' + description + '</div><div class="content-score col-md-2">' + score + '</div><div class="content-feedback col-md-2">' + 'FEEDBACK' + '</div></div></div>'
 }
 
 $("#fetchSubmit").click(function() {
@@ -34,8 +36,7 @@ $("#fetchSubmit").click(function() {
 
             var loadedResponse = JSON.parse(response)
             _.each(loadedResponse, function(content) {
-                // var contentElement = '<tr class="content-recommendation"><td>' + content['title'] + '</td></tr>'
-                var contentElement = get_content_element(content['title'], content['description'], 0.9)
+                var contentElement = get_content_element(content['title'], content['description'], content['score'])
                 $('#results-container').append(contentElement)
             });
 
