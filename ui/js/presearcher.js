@@ -4,7 +4,7 @@ function get_feedback_element() {
             class="btn btn-danger feedback-negative">Minus</button>'
 }
 
-function get_content_element(title, description, link, score) {
+function get_content_element(title, description, link, score, contentJSON) {
     /* Logic to Draw an HTML Content element from the relevant details
     Sample:
     <div class="card content-recommendation">
@@ -30,6 +30,7 @@ function get_content_element(title, description, link, score) {
     */
 
     return '<div class="card content-recommendation">\
+            <div class="content-json">' + encodeURIComponent(contentJSON) + '</div>\
             <div class="card-body">\
             <h5 class="card-title"><a href="' +
             link + '">' + title +
@@ -53,10 +54,21 @@ $("#fetchSubmit").click(function() {
 
             var loadedResponse = JSON.parse(response)
             _.each(loadedResponse, function(content) {
-                var contentElement = get_content_element(content['title'], content['description'], content['link'], content['score'])
+                var contentElement = get_content_element(content['title'], content['description'], content['link'], content['score'], response)
                 $('#results-container').append(contentElement)
             });
+
+            wireFeedbackButtons()
 
         },
     });
 });
+
+function wireFeedbackButtons() {
+    $('.feedback-positive').click(function(ev) {
+        var contentJSON = $(ev.target.parentElement.parentElement.parentElement).find('.content-json')[0].innerHTML
+        contentJSON = decodeURIComponent(contentJSON)
+        // Send Feedback to API
+        debugger;
+    })
+};
