@@ -4,7 +4,7 @@ import json
 
 from flask import Flask, request, render_template, send_from_directory
 
-from presearcher import PresearcherEnv
+from presearcher.env import PresearcherEnv
 
 app = Flask(__name__)
 env = PresearcherEnv()

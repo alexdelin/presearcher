@@ -6,9 +6,9 @@ from random import shuffle
 import feedparser
 import six
 
-from model import PresearcherModel
-from utils import ensure_dir, ensure_file, _read_file, _write_file, \
-                  get_env_config, cleanup_title
+from presearcher.model import PresearcherModel
+from presearcher.utils import ensure_dir, ensure_file, _read_file, \
+                              _write_file, get_env_config, cleanup_title
 
 
 class PresearcherEnv(object):
