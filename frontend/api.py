@@ -25,17 +25,17 @@ def new_profile():
 
 @app.route('/js/<path:path>', methods=['GET', 'POST'])
 def send_js(path):
-    return send_from_directory('ui/js', path)
+    return send_from_directory('js', path)
 
 
 @app.route('/css/<path:path>', methods=['GET', 'POST'])
 def send_css(path):
-    return send_from_directory('ui/css', path)
+    return send_from_directory('css', path)
 
 
 @app.route('/img/<path:path>', methods=['GET', 'POST'])
 def send_img(path):
-    return send_from_directory('ui/img', path)
+    return send_from_directory('img', path)
 
 
 # ----- Main Web App Routes -----
