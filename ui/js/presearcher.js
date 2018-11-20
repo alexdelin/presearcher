@@ -65,10 +65,44 @@ $("#fetchSubmit").click(function() {
 });
 
 function wireFeedbackButtons() {
+
     $('.feedback-positive').click(function(ev) {
         var contentJSON = $(ev.target.parentElement.parentElement.parentElement).find('.content-json')[0].innerHTML
         contentJSON = decodeURIComponent(contentJSON)
+        var profileSelected = $('#profileSelected')[0].value
         // Send Feedback to API
+        var data = {
+            "profile_name": profileSelected,
+            "feedback_type": "pos",
+            "content": contentJSON
+        }
+        $.ajax({
+            url: '/feedback',
+            data: data,
+            success: function() {
+                alert('Added Feedback!')
+            }
+        });
+        debugger;
+    });
+
+    $('.feedback-negative').click(function(ev) {
+        var contentJSON = $(ev.target.parentElement.parentElement.parentElement).find('.content-json')[0].innerHTML
+        contentJSON = decodeURIComponent(contentJSON)
+        var profileSelected = $('#profileSelected')[0].value
+        // Send Feedback to API
+        var data = {
+            "profile_name": profileSelected,
+            "feedback_type": "neg",
+            "content": contentJSON
+        }
+        $.ajax({
+            url: '/feedback',
+            data: data,
+            success: function() {
+                alert('Added Feedback!')
+            }
+        });
         debugger;
     })
 };
