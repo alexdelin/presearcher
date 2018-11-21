@@ -2,7 +2,7 @@ function get_feedback_element() {
     return '<button type="button" class="btn btn-success \
             feedback-positive">Plus</button><button type="button" \
             class="btn btn-danger feedback-negative">Minus</button>'
-}
+};
 
 function get_content_element(title, description, link, score, contentJSON) {
     /* Logic to Draw an HTML Content element from the relevant details
@@ -39,7 +39,12 @@ function get_content_element(title, description, link, score, contentJSON) {
             '</div><div class="content-score col-md-2">' + score +
             '</div><div class="content-feedback col-md-2">' +
             get_feedback_element() + '</div></div></div>'
-}
+};
+
+function renderLastFetchedScored(last_fetched, last_scored) {
+    $('#lastFetchedPlaceholder').html(last_fetched);
+    $('#lastScoredPlaceholder').html(last_scored);
+};
 
 $("#fetchSubmit").click(function() {
 
@@ -53,12 +58,13 @@ $("#fetchSubmit").click(function() {
         success: function(response) {
 
             var loadedResponse = JSON.parse(response)
-            _.each(loadedResponse, function(content) {
+            _.each(loadedResponse['content'], function(content) {
                 var contentElement = get_content_element(content['title'], content['description'], content['link'], content['score'], JSON.stringify(content))
                 $('#results-container').append(contentElement)
             });
 
-            wireFeedbackButtons()
+            wireFeedbackButtons();
+            renderLastFetchedScored(loadedResponse['last_fetched'], loadedResponse['last_scored']);
 
         },
     });

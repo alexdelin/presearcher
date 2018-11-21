@@ -103,7 +103,7 @@ def fetch_content():
     return 'Success!'
 
 
-@app.route('/score')
+@app.route('/score', methods=['POST'])
 def rescore():
     # fetch updated content from all subscriptions
     env.rescore_all_profiles()

@@ -77,7 +77,6 @@ class PresearcherEnv(object):
         current_subscriptions = _read_file(self.subscriptions_file_path)
         print('Adding subscription ' + subscription_url)
 
-        #TODO - Validate that the new url is a valid RSS Feed
         if not validate_subscription_url(subscription_url):
             raise ValueError('Invalid Subscription URL')
 
@@ -139,6 +138,9 @@ class PresearcherEnv(object):
 
         for item_id, item_content in six.iteritems(current_content):
 
+            if item_id in ['last_fetched', 'last_scored']:
+                continue
+
             item_pub = item_content.get('timestamp')
             pub_date = datetime.strptime(item_pub, '%Y-%m-%dT%H:%M:%S')
             time_elapsed = datetime.now() - pub_date
@@ -164,7 +166,7 @@ class PresearcherEnv(object):
         feed_items = []
         feed = feedparser.parse(feed_url)
 
-        if parsed.bozo or 'bozo_exception' in parsed.keys():
+        if feed.bozo or 'bozo_exception' in feed.keys():
             # Invalid feed Syntax detected by feedparser
             raise ValueError('Invalid feed data for URL ' + feed_url)
 
@@ -248,6 +250,10 @@ class PresearcherEnv(object):
         content_links, content_data = [], []
 
         for link, data in six.iteritems(full_content):
+
+            if link in ['last_fetched', 'last_scored']:
+                continue
+
             content_links.append(link)
             content_data.append(data)
 
@@ -256,9 +262,13 @@ class PresearcherEnv(object):
         predictions = self.model.predict(content_data)
 
         for prediction, link, content in zip(predictions, content_links, content_data):
+
             content.setdefault('profiles', {})
             content['profiles'][profile_name] = prediction['pos']
             new_content[link] = content
+
+        # Add last fetched time back in
+        new_content['last_fetched'] = full_content['last_fetched']
 
         _write_file(self.content_file_path, new_content)
 
@@ -269,6 +279,9 @@ class PresearcherEnv(object):
         content_list = []
 
         for content_id, content_data in six.iteritems(all_content):
+
+            if content_id in ['last_scored', 'last_fetched']:
+                continue
 
             content_data['score'] = content_data.get('profiles', {}).get(
                                                         profile_name, 0)
@@ -293,4 +306,10 @@ class PresearcherEnv(object):
         else:
             sorted_content = sorted_content[start:]
 
-        return sorted_content
+        top_content = {
+            "last_fetched": all_content.get('last_fetched', ''),
+            "last_scored": all_content.get('last_scored', ''),
+            "content": sorted_content
+        }
+
+        return top_content
