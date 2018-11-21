@@ -8,7 +8,8 @@ import six
 
 from presearcher.model import PresearcherModel
 from presearcher.utils import ensure_dir, ensure_file, _read_file, \
-                              _write_file, get_env_config, cleanup_title
+                              _write_file, get_env_config, cleanup_title \
+                              validate_subscription_url
 
 
 class PresearcherEnv(object):
@@ -77,6 +78,8 @@ class PresearcherEnv(object):
         print('Adding subscription ' + subscription_url)
 
         #TODO - Validate that the new url is a valid RSS Feed
+        if not validate_subscription_url(subscription_url):
+            raise ValueError('Invalid Subscription URL')
 
         if subscription_url not in current_subscriptions:
             current_subscriptions.append(subscription_url)
@@ -156,6 +159,10 @@ class PresearcherEnv(object):
 
         feed_items = []
         feed = feedparser.parse(feed_url)
+
+        if parsed.bozo or 'bozo_exception' in parsed.keys():
+            # Invalid feed Syntax detected by feedparser
+            raise ValueError('Invalid feed data for URL ' + feed_url)
 
         for item in feed['items']:
 

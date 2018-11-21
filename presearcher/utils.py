@@ -2,6 +2,8 @@ import os
 import json
 import re
 
+import feedparser
+
 
 def ensure_dir(dir):
 
@@ -48,3 +50,14 @@ def cleanup_title(title):
 
     title = re.sub(string=title, pattern=r'\(arXiv:.*?\)', repl='')
     return title
+
+
+def validate_subscription_url(url):
+
+    parsed = feedparser.parse(url)
+
+    if parsed.bozo or 'bozo_exception' in parsed.keys():
+        # Invalid feed Syntax detected by feedparser
+        return False
+
+    return True
