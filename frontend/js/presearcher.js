@@ -76,6 +76,21 @@ $("#reScoreSubmit").click(function() {
     });
 });
 
+$("#subscribeSubmit").click(function() {
+    console.log( "Handler for Subscribe submit called." );
+
+    var newSubscription = $('#newSubscription')[0].value
+    debugger;
+    $.ajax({
+        type: 'POST',
+        url: '/subscriptions',
+        data: {"url": newSubscription},
+        success: function() {
+            alert('Added New Subscription')
+        },
+    });
+});
+
 function wireFeedbackButtons() {
 
     $('.feedback-positive').click(function(ev) {

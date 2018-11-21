@@ -23,6 +23,12 @@ def new_profile():
     return render_template('new_profile.j2')
 
 
+@app.route('/subscriptions', methods=['GET'])
+def subscriptions():
+    subscriptions = env.get_subscriptions()
+    return render_template('subscriptions.j2', subscriptions=subscriptions)
+
+
 @app.route('/js/<path:path>', methods=['GET', 'POST'])
 def send_js(path):
     return send_from_directory('js', path)
@@ -61,6 +67,13 @@ def create_profile():
     # Create a new Profile
     profile_name = request.args.get('profile_name')
     env.add_profile(profile_name)
+    return 'Success'
+
+
+@app.route('/subscriptions', methods=['POST'])
+def new_subscription():
+    new_subscription_url = request.form.get('url')
+    env.add_subscription(new_subscription_url)
     return 'Success'
 
 

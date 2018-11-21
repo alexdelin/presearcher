@@ -6,7 +6,7 @@
     <script type="text/javascript" src="/js/jquery-min.js"></script>
     <script type="text/javascript" src="/js/underscore-min.js"></script>
     <script type="text/javascript" src="/js/presearcher.js" defer></script>
-    <title>Presearcher - Create Profile</title>
+    <title>Presearcher - Manage Subscriptions</title>
 </head>
 <body>
 
@@ -21,22 +21,29 @@
                 <a href="/">
                     <img id="ml-logo" src="/img/microscope.png" height="60">
                 </a>
-                <h1 id="ml-title">Presearcher - Create Profile</h1>
+                <h1 id="ml-title">Presearcher - Manage Subscriptions</h1>
             </div>
         </div>
 
-        <div class="row">
+        <div class="row main-content">
 
             <div class="col-md-4"></div>
 
-            <div class="col-md-4">
+            <div class="col-md-4 top-spaced">
+                <h3>Subscriptions</h3>
                 <form>
                     <div class="form-group">
-                        <label for="profileName">Profile Name</label>
-                        <input type="text" class="form-control" id="profileName">
+                        <ul class="list-group">
+                            {% for subscription in subscriptions%}
+                                <li class="list-group-item">{{ subscription }}</li>
+                            {% endfor %}
+                        </ul>
+
+                        <label for="newSubscription" class="control-label mb-2 mr-sm-2 top-spaced">Add Subscription:</label>
+                        <input type="text" class="form-control" id="newSubscription">
                     </div>
-                    <button type="submit" class="btn btn-default">Submit</button>
                 </form>
+                <button id="subscribeSubmit" class="btn btn-primary mb-2 mr-sm-2">Submit</button>
             </div>
 
             <div class="col-md-4"></div>

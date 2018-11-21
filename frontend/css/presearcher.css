@@ -18,6 +18,14 @@
 .gutter {
 }
 
+.main-content {
+    min-height: 800px;
+}
+
+.top-spaced {
+    margin-top: 2rem;
+}
+
 .pagewrapper {
     background-color: white;
 }
@@ -33,7 +41,7 @@
 }
 
 #results-container {
-    min-height: 1000px;
+    min-height: 800px;
 }
 
 .content-recommendation {

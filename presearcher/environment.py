@@ -48,6 +48,11 @@ class PresearcherEnv(object):
         profile_list = _read_file(self.profiles_file_path)
         return profile_list
 
+    def get_subscriptions(self):
+
+        subscriptions_list = _read_file(self.subscriptions_file_path)
+        return subscriptions_list
+
     def add_profile(self, profile_name):
 
         current_profiles = _read_file(self.profiles_file_path)
@@ -65,6 +70,18 @@ class PresearcherEnv(object):
         else:
             raise ValueError('The profile {name} already exists!'.format(
                                 name=new_profile))
+
+    def add_subscription(self, subscription_url):
+
+        current_subscriptions = _read_file(self.subscriptions_file_path)
+        print('Adding subscription ' + subscription_url)
+
+        #TODO - Validate that the new url is a valid RSS Feed
+
+        if subscription_url not in current_subscriptions:
+            current_subscriptions.append(subscription_url)
+
+        _write_file(self.subscriptions_file_path, current_subscriptions)
 
     def add_feedback(self, profile_name, feedback_type, content):
         ''' Store feedback on suggested content
