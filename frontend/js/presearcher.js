@@ -64,6 +64,18 @@ $("#fetchSubmit").click(function() {
     });
 });
 
+$("#reScoreSubmit").click(function() {
+    console.log( "Handler for ReScore submit called." );
+
+    $.ajax({
+        type: 'POST',
+        url: '/score',
+        success: function() {
+            alert('Re-Scored All Profiles!')
+        },
+    });
+});
+
 function wireFeedbackButtons() {
 
     $('.feedback-positive').click(function(ev) {
