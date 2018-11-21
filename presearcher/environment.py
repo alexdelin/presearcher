@@ -8,7 +8,7 @@ import six
 
 from presearcher.model import PresearcherModel
 from presearcher.utils import ensure_dir, ensure_file, _read_file, \
-                              _write_file, get_env_config, cleanup_title \
+                              _write_file, get_env_config, cleanup_title, \
                               validate_subscription_url
 
 
@@ -151,6 +151,10 @@ class PresearcherEnv(object):
         for item in old_content:
             del current_content[item]
 
+        # Update Timestamp for Last Fetched Time
+        current_timestamp = datetime.now().isoformat()[:19]
+        current_content['last_fetched'] = current_timestamp
+
         # Write updated content to file
         _write_file(self.content_file_path, current_content)
 
@@ -198,6 +202,15 @@ class PresearcherEnv(object):
             error = self.train_from_feedback(profile)
             if not error:
                 self.rescore_profile(profile)
+
+        self.update_last_scored_time()
+
+    def update_last_scored_time(self):
+
+        content = _read_file(self.content_file_path)
+        content['last_scored'] = datetime.now().isoformat()[:19]
+
+        _write_file(self.content_file_path, content)
 
     def train_from_feedback(self, profile_name):
         # Train the model from the feedback received
