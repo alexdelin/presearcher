@@ -236,6 +236,10 @@ class PresearcherEnv(object):
             content_data['score'] = content_data.get('profiles', {}).get(
                                                         profile_name, 0)
             content_data['score'] = round(content_data['score'], 2)
+
+            if content_data.get('profiles'):
+                del content_data['profiles']
+
             content_list.append(content_data)
 
         sorted_content = sorted(content_list,

@@ -54,7 +54,7 @@ $("#fetchSubmit").click(function() {
 
             var loadedResponse = JSON.parse(response)
             _.each(loadedResponse, function(content) {
-                var contentElement = get_content_element(content['title'], content['description'], content['link'], content['score'], response)
+                var contentElement = get_content_element(content['title'], content['description'], content['link'], content['score'], JSON.stringify(content))
                 $('#results-container').append(contentElement)
             });
 
@@ -77,13 +77,13 @@ function wireFeedbackButtons() {
             "content": contentJSON
         }
         $.ajax({
+            type: 'POST',
             url: '/feedback',
-            data: data,
+            data: JSON.stringify(data),
             success: function() {
                 alert('Added Feedback!')
             }
         });
-        debugger;
     });
 
     $('.feedback-negative').click(function(ev) {
@@ -97,12 +97,12 @@ function wireFeedbackButtons() {
             "content": contentJSON
         }
         $.ajax({
+            type: 'POST',
             url: '/feedback',
-            data: data,
+            data: JSON.stringify(data),
             success: function() {
                 alert('Added Feedback!')
             }
         });
-        debugger;
     })
 };

@@ -4,7 +4,7 @@ import json
 
 from flask import Flask, request, render_template, send_from_directory
 
-from presearcher.env import PresearcherEnv
+from presearcher.environment import PresearcherEnv
 
 app = Flask(__name__)
 env = PresearcherEnv()
@@ -64,14 +64,17 @@ def create_profile():
     return 'Success'
 
 
-@app.route('/feedback', methods=['POST'])
+@app.route('/feedback', methods=['GET', 'POST'])
 def send_feedback():
     # Send feedback on a document
     request_data = request.get_json(force=True)
 
     profile_name = request_data.get('profile_name')
     feedback_type = request_data.get('feedback_type')
-    content = request_data.get('content')
+    content = json.loads(request_data.get('content', {}))
+
+    if not profile_name or not feedback_type or not content:
+        return 'ERROR, Missing Necessary Param'
 
     env.add_feedback(profile_name, feedback_type, content)
 
