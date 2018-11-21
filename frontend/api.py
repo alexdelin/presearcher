@@ -65,7 +65,7 @@ def get_profiles():
 @app.route('/profiles', methods=['POST'])
 def create_profile():
     # Create a new Profile
-    profile_name = request.args.get('profile_name')
+    profile_name = request.form.get('profile_name')
     env.add_profile(profile_name)
     return 'Success'
 

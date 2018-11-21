@@ -80,13 +80,26 @@ $("#subscribeSubmit").click(function() {
     console.log( "Handler for Subscribe submit called." );
 
     var newSubscription = $('#newSubscription')[0].value
-    debugger;
     $.ajax({
         type: 'POST',
         url: '/subscriptions',
         data: {"url": newSubscription},
         success: function() {
             alert('Added New Subscription')
+        },
+    });
+});
+
+$("#createProfileSubmit").click(function() {
+    console.log( "Handler for Create Profile submit called." );
+
+    var newProfile = $('#profileName')[0].value
+    $.ajax({
+        type: 'POST',
+        url: '/profiles',
+        data: {"profile_name": newProfile},
+        success: function() {
+            alert('Added New Profile')
         },
     });
 });
