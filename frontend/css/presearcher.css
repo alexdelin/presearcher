@@ -1,0 +1,66 @@
+#ml-logo {
+    display: inline;
+}
+
+#ml-title {
+    display: inline;
+    vertical-align: middle;
+    padding-left: 10px;
+}
+
+.title-bar {
+    background-color: black;
+    color: white;
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+
+.gutter {
+}
+
+.main-content {
+    min-height: 800px;
+}
+
+.top-spaced {
+    margin-top: 2rem;
+}
+
+.pagewrapper {
+    background-color: white;
+}
+
+.fullwrapper {
+    background-color: black;
+}
+
+#page-name {
+    float: right;
+    display: inline;
+    vertical-align: middle;
+}
+
+#results-container {
+    min-height: 800px;
+}
+
+.content-recommendation {
+    margin: 5px;
+    margin-bottom: 2rem;
+}
+
+.top-buttons {
+    margin: 20px;
+}
+
+.content-json {
+    display: none;
+}
+
+.content-title {}
+
+.content-description {}
+
+.content-rating {}
+
+.content-feedback {}

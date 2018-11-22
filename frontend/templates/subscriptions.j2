@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="/css/presearcher.css">
+    <link rel="stylesheet" href="/css/bootstrap-min.css">
+    <script type="text/javascript" src="/js/jquery-min.js"></script>
+    <script type="text/javascript" src="/js/underscore-min.js"></script>
+    <script type="text/javascript" src="/js/presearcher.js" defer></script>
+    <title>Presearcher - Manage Subscriptions</title>
+</head>
+<body>
+
+<div class="row fullwrapper">
+
+    <div class="col-md-1 gutter"></div>
+
+    <div class="col-md-10 pagewrapper">
+
+        <div class="row title-bar">
+            <div class="col-md-12">
+                <a href="/">
+                    <img id="ml-logo" src="/img/microscope.png" height="60">
+                </a>
+                <h1 id="ml-title">Presearcher - Manage Subscriptions</h1>
+            </div>
+        </div>
+
+        <div class="row main-content">
+
+            <div class="col-md-4"></div>
+
+            <div class="col-md-4 top-spaced">
+                <h3>Subscriptions</h3>
+                <form>
+                    <div class="form-group">
+                        <ul class="list-group">
+                            {% for subscription in subscriptions%}
+                                <li class="list-group-item">{{ subscription }}</li>
+                            {% endfor %}
+                        </ul>
+
+                        <label for="newSubscription" class="control-label mb-2 mr-sm-2 top-spaced">Add Subscription:</label>
+                        <input type="text" class="form-control" id="newSubscription">
+                    </div>
+                </form>
+                <button id="subscribeSubmit" class="btn btn-primary mb-2 mr-sm-2">Submit</button>
+            </div>
+
+            <div class="col-md-4"></div>
+
+        </div>
+    </div>
+    <div class="col-md-1 gutter"></div>
+</div>
+
+</body>
+</html>
