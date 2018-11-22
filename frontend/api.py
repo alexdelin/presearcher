@@ -13,9 +13,18 @@ env = PresearcherEnv()
 # ----- UI + Web Content Routes -----
 
 @app.route('/')
-def show_ui():
+def select_profile():
     profile_list = env.get_profiles()
-    return render_template('index.j2', profiles=profile_list)
+    return render_template('select_profile.j2', profiles=profile_list)
+
+
+@app.route('/viewer/<profile_name>')
+def show_ui(profile_name):
+    limit = request.args.get('limit', 20)
+    start = request.args.get('start', 0)
+    top_content = env.get_top_content(profile_name, limit, start)
+    return render_template('viewer.j2', profile_name=profile_name,
+                           top_content=top_content)
 
 
 @app.route('/new_profile')
@@ -85,6 +94,9 @@ def send_feedback():
     profile_name = request_data.get('profile_name')
     feedback_type = request_data.get('feedback_type')
     content = json.loads(request_data.get('content', {}))
+    # print(json.dumps(content))
+    print(profile_name)
+    print(feedback_type)
 
     if not profile_name or not feedback_type or not content:
         return 'ERROR, Missing Necessary Param'

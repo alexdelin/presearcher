@@ -115,7 +115,7 @@ function wireFeedbackButtons() {
     $('.feedback-positive').click(function(ev) {
         var contentJSON = $(ev.target.parentElement.parentElement.parentElement).find('.content-json')[0].innerHTML
         contentJSON = decodeURIComponent(contentJSON)
-        var profileSelected = $('#profileSelected')[0].value
+        var profileSelected = $('#profileName')[0].innerText
         // Send Feedback to API
         var data = {
             "profile_name": profileSelected,
@@ -135,7 +135,7 @@ function wireFeedbackButtons() {
     $('.feedback-negative').click(function(ev) {
         var contentJSON = $(ev.target.parentElement.parentElement.parentElement).find('.content-json')[0].innerHTML
         contentJSON = decodeURIComponent(contentJSON)
-        var profileSelected = $('#profileSelected')[0].value
+        var profileSelected = $('#profileName')[0].innerText
         // Send Feedback to API
         var data = {
             "profile_name": profileSelected,
@@ -152,3 +152,5 @@ function wireFeedbackButtons() {
         });
     })
 };
+
+wireFeedbackButtons();

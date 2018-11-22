@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="/css/presearcher.css">
+    <link rel="stylesheet" href="/css/bootstrap-min.css">
+    <script type="text/javascript" src="/js/jquery-min.js"></script>
+    <script type="text/javascript" src="/js/underscore-min.js"></script>
+    <script type="text/javascript" src="/js/presearcher.js" defer></script>
+    <title>Presearcher - Select Profile</title>
+</head>
+<body>
+
+<div class="row fullwrapper">
+
+    <div class="col-md-1 gutter"></div>
+
+    <div class="col-md-10 pagewrapper">
+
+        <div class="row title-bar">
+            <div class="col-md-12">
+                <a href="/">
+                    <img id="ml-logo" src="/img/microscope.png" height="60">
+                </a>
+                <h1 id="ml-title">Presearcher - Select Profile</h1>
+            </div>
+        </div>
+
+        <div class="row main-content">
+
+            <div class="col-md-4"></div>
+
+            <div class="col-md-4 top-spaced">
+                <h3>Profiles</h3>
+                <form>
+                    <div class="form-group">
+                        <ul class="list-group">
+                            {% for profile in profiles %}
+                                <a href="/viewer/{{ profile }}" class="list-group-item list-group-item-action">{{ profile }}</a>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </form>
+                <a id="newProfile" href="/new_profile" class="btn btn-primary mb-2 mr-sm-2">New Profile</a>
+            </div>
+
+            <div class="col-md-4"></div>
+
+        </div>
+    </div>
+    <div class="col-md-1 gutter"></div>
+</div>
+
+</body>
+</html>

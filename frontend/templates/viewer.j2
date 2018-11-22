@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="/css/presearcher.css">
+    <link rel="stylesheet" href="/css/bootstrap-min.css">
+    <script type="text/javascript" src="/js/jquery-min.js"></script>
+    <script type="text/javascript" src="/js/underscore-min.js"></script>
+    <script type="text/javascript" src="/js/presearcher.js" defer></script>
+    <title>Presearcher</title>
+</head>
+<body>
+
+<div class="row fullwrapper">
+
+    <div class="col-md-1 gutter"></div>
+
+    <div class="col-md-10 pagewrapper">
+
+        <div class="row title-bar">
+            <div class="col-md-12">
+                <a href="/">
+                    <img id="ml-logo" src="/img/microscope.png" height="60">
+                </a>
+                <h1 id="ml-title">Presearcher</h1>
+            </div>
+        </div>
+
+        <div class="row top-buttons">
+            <h3>Profile: <span id="profileName">{{ profile_name }}</span></h3>
+        </div>
+
+        <div class="row top-buttons">
+
+            <div class="col-md-8">
+
+                <form class="form-inline">
+                    <button id="reScoreSubmit" type="button" class="btn btn-primary mb-2 mr-sm-2">Re-Score</button>
+                </form>
+
+            </div>
+
+            <div class="col-md-4">
+
+                <a class="btn btn-outline-secondary" href="/subscriptions" role="button">Subscriptions</a>
+
+            </div>
+        </div>
+
+        <div class="row top-spaced">
+            <div class="col-md-6">
+                Last Fetched: <div id="lastFetchedPlaceholder">{{ top_content['last_fetched'] }}</div>
+            </div>
+            <div class="col-md-6">
+                Last Scored: <div id="lastScoredPlaceholder">{{ top_content['last_scored'] }}</div>
+            </div>
+        </div>
+
+        <div class="row top-spaced">
+            <div class="col-md-12" id="results-container">
+
+                {% for element in top_content['content'] %}
+                    <div class="card content-recommendation">
+                        <div class="content-json">
+                            {{ element|tojson|urlencode }}
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <a href="{{ element['link'] }}">
+                                    {{ element['title'] }}
+                                </a>
+                            </h5>
+                        </div>
+                        <div class="card-body row">
+                            <div class="card-text col-md-8">
+                                {{ element['description'] }}
+                            </div>
+                            <div class="content-score col-md-2">
+                                {{ element['score'] }}
+                            </div>
+                            <div class="content-feedback col-md-2">
+                                <button type="button" class="btn btn-success feedback-positive">
+                                    pos
+                                </button>
+                                <button type="button" class="btn btn-danger feedback-negative">
+                                    neg
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+
+            </div>
+        </div>
+    </div>
+    <div class="col-md-1 gutter"></div>
+</div>
+
+</body>
+</html>
