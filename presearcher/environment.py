@@ -93,14 +93,37 @@ class PresearcherEnv(object):
 
         feedback_filename = '{base}feedback/{profile}.json'.format(
                                     base=self.data_dir, profile=profile_name)
-        ensure_file(feedback_filename, [])
+        ensure_file(feedback_filename, {})
 
         feedback = _read_file(feedback_filename)
+
         if feedback_type in ['pos', 'neg']:
-            feedback.append({
+            feedback_element = {
                 "label": feedback_type,
                 "content": content
-            })
+            }
+
+            feedback_link = feedback_element['content']['link']
+
+            if not feedback_link:
+                raise ValueError('No Link found in Feedback Element {}'.format(
+                    feedback_element['content']))
+
+            if feedback_link in feedback.keys():
+                '''Feedback already exists, check that the
+                label is the same, otherwise replace it with the
+                new label
+                '''
+                if feedback[feedback_link]['label'] == feedback_element['label']:
+                    '''Labels Match. Do nothing because that
+                    exact feedback already exists
+                    '''
+                    pass
+                else:
+                    # Labels do not Match, update it with the new feedback
+                    feedback[feedback_link] = feedback_element
+            else:
+                feedback[feedback_link] = feedback_element
 
         else:
             raise ValueError('Invalid Feedback Type {}'.format(feedback_type))
@@ -226,6 +249,7 @@ class PresearcherEnv(object):
                                     base=self.data_dir, profile=profile_name)
         try:
             training_content = _read_file(feedback_filename)
+            training_content = training_content.values()
         except (OSError, IOError):
             raise ValueError('No Feedback file found for profile {}'.format(
                                 profile_name))

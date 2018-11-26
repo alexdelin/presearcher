@@ -94,9 +94,6 @@ def send_feedback():
     profile_name = request_data.get('profile_name')
     feedback_type = request_data.get('feedback_type')
     content = json.loads(request_data.get('content', {}))
-    # print(json.dumps(content))
-    print(profile_name)
-    print(feedback_type)
 
     if not profile_name or not feedback_type or not content:
         return 'ERROR, Missing Necessary Param'
