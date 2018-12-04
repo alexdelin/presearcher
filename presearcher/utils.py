@@ -61,3 +61,11 @@ def validate_subscription_url(url):
         return False
 
     return True
+
+
+def log_request(request, logger):
+
+    log_message = 'API Access - {method} {path}'.format(
+                        method=request.method,
+                        path=request.full_path)
+    logger.info(log_message)

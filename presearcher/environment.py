@@ -14,7 +14,13 @@ from presearcher.utils import ensure_dir, ensure_file, _read_file, \
 
 class PresearcherEnv(object):
 
-    def __init__(self, config_file='~/.presearcher.json'):
+    def __init__(self, logger=None, config_file='~/.presearcher.json'):
+
+        if logger:
+            self.log = logger
+        else:
+            #TODO Move instantiation to here and just
+            pass
 
         self.env_config = get_env_config(config_file)
         self.data_dir = self.get_data_dir()
@@ -31,6 +37,8 @@ class PresearcherEnv(object):
         self.model_data_dir = self.data_dir + 'model_data/'
         ensure_dir(self.model_data_dir)
         self.model = PresearcherModel(data_dir=self.model_data_dir)
+
+        self.log.info('Running App')
 
     def get_data_dir(self):
 
