@@ -83,7 +83,7 @@ class PresearcherEnv(object):
     def add_subscription(self, subscription_url):
 
         current_subscriptions = _read_file(self.subscriptions_file_path)
-        print('Adding subscription ' + subscription_url)
+        self.log.info('Adding subscription ' + subscription_url)
 
         if not validate_subscription_url(subscription_url):
             raise ValueError('Invalid Subscription URL')
@@ -137,6 +137,10 @@ class PresearcherEnv(object):
             raise ValueError('Invalid Feedback Type {}'.format(feedback_type))
 
         _write_file(feedback_filename, feedback)
+        self.log.info('Added {feedback_type} feedback for '
+                      'profile {profile_name}'.format(
+                        feedback_type=feedback_type,
+                        profile_name=profile_name))
 
     def update_content(self):
         ''' Fetch Additional Content for all subscriptions
@@ -147,18 +151,20 @@ class PresearcherEnv(object):
         current_content = _read_file(self.content_file_path)
         all_subscriptions = _read_file(self.subscriptions_file_path)
 
-        print('Updating Content')
+        self.log.info('Updating Content')
 
         # Get updated content for every subscription
         for subscription in all_subscriptions:
 
-            print('updating subscription ' + subscription)
+            self.log.info('updating subscription ' + subscription)
 
             subscription_content = self.parse_feed(subscription)
             for item in subscription_content:
 
                 if not item.get('link'):
-                    print('No Link!!!')
+
+                    self.log.warn('No Link in item {content}'.format(
+                                    content=item))
                     continue
 
                 if item['link'] not in current_content.keys():
@@ -178,7 +184,7 @@ class PresearcherEnv(object):
             days_elapsed = time_elapsed.days
 
             if days_elapsed >= self.time_window:
-                print('Item too Old!!!')
+                self.log.info('Item too Old!!!')
                 old_content.append(item_id)
 
         for item in old_content:
@@ -223,6 +229,7 @@ class PresearcherEnv(object):
 
             feed_items.append(parsed_item)
 
+        self.log.info('Updated Feed {url}'.format(url=feed_url))
         return feed_items
 
     def rescore_all_profiles(self):
@@ -231,9 +238,15 @@ class PresearcherEnv(object):
         profile_list = _read_file(self.profiles_file_path)
 
         for profile in profile_list:
-            print('Rescoring profile {}'.format(profile))
+
+            self.log.info('Rescoring profile {}'.format(profile))
+
             error = self.train_from_feedback(profile)
-            if not error:
+            if error:
+                self.log.warn('Got an error training from feedback '
+                              'for profile {profile_name}'.format(
+                                    profile_name=profile))
+            else:
                 self.rescore_profile(profile)
 
         self.update_last_scored_time()
@@ -264,14 +277,14 @@ class PresearcherEnv(object):
         shuffle(training_content)
 
         if not training_content:
-            print('Skipping profile {} because it '
-                  'has no training content'.format(
-                    profile_name))
+            self.log.info('Skipping profile {profile_name} because it '
+                          'has no training content'.format(
+                                profile_name=profile_name))
             return True
 
         self.model.train(training_content)
-        print('Successfully trained on {} examples'.format(
-                        len(training_content)))
+        self.log.info('Successfully trained on {num} examples'.format(
+                        num=len(training_content)))
 
         return False
 
