@@ -1,8 +1,6 @@
 #! /usr/bin/env/python
 
 import json
-import logging
-from logging.handlers import RotatingFileHandler
 
 from flask import Flask, request, render_template, send_from_directory
 
@@ -11,15 +9,8 @@ from presearcher.utils import log_request
 
 app = Flask(__name__)
 
-logger = logging.getLogger('presearcher_api')
-logger.setLevel(logging.DEBUG)
-log_handler = RotatingFileHandler('log/api.log', maxBytes=10000,
-                                  backupCount=10)
-log_formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(message)s')
-log_handler.setFormatter(log_formatter)
-logger.addHandler(log_handler)
-
-env = PresearcherEnv(logger=logger)
+env = PresearcherEnv()
+logger = env.log
 
 
 # ----- UI + Web Content Routes -----

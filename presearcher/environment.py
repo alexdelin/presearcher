@@ -2,6 +2,8 @@ import os
 from time import mktime
 from datetime import datetime
 from random import shuffle
+import logging
+from logging.handlers import RotatingFileHandler
 
 import feedparser
 import six
@@ -14,16 +16,20 @@ from presearcher.utils import ensure_dir, ensure_file, _read_file, \
 
 class PresearcherEnv(object):
 
-    def __init__(self, logger=None, config_file='~/.presearcher.json'):
-
-        if logger:
-            self.log = logger
-        else:
-            #TODO Move instantiation to here and just
-            pass
+    def __init__(self, config_file='~/.presearcher.json'):
 
         self.env_config = get_env_config(config_file)
         self.data_dir = self.get_data_dir()
+
+        self.log = logging.getLogger('presearcher_api')
+        self.log.setLevel(logging.DEBUG)
+        log_handler = RotatingFileHandler('log/api.log', maxBytes=10000,
+                                          backupCount=10)
+        log_formatter = logging.Formatter(
+            '%(asctime)s [%(levelname)s] %(message)s')
+        log_handler.setFormatter(log_formatter)
+        self.log.addHandler(log_handler)
+
         self.time_window = self.env_config.get('time_window', 14)
 
         # Easy access to commonly used files
