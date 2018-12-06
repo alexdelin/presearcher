@@ -23,7 +23,10 @@ class PresearcherEnv(object):
 
         self.log = logging.getLogger('presearcher_api')
         self.log.setLevel(logging.DEBUG)
-        log_handler = RotatingFileHandler('log/api.log', maxBytes=10000,
+        ensure_dir('{base_dir}log'.format(base_dir=self.data_dir))
+        log_handler = RotatingFileHandler('{base_dir}log/api.log'.format(
+                                            base_dir=self.data_dir),
+                                          maxBytes=10000,
                                           backupCount=10)
         log_formatter = logging.Formatter(
             '%(asctime)s [%(levelname)s] %(message)s')
