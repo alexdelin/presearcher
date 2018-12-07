@@ -23,6 +23,7 @@ class PresearcherEnv(object):
 
         self.log = logging.getLogger('presearcher_api')
         self.log.setLevel(logging.DEBUG)
+        # Can't pass the logger in here because it's not instantiated yet
         ensure_dir('{base_dir}log'.format(base_dir=self.data_dir))
         log_handler = RotatingFileHandler('{base_dir}log/api.log'.format(
                                             base_dir=self.data_dir),
@@ -37,14 +38,14 @@ class PresearcherEnv(object):
 
         # Easy access to commonly used files
         self.profiles_file_path = self.data_dir + 'profiles.json'
-        ensure_file(self.profiles_file_path, [])
+        ensure_file(self.profiles_file_path, [], self.log)
         self.subscriptions_file_path = self.data_dir + 'subscriptions.json'
-        ensure_file(self.subscriptions_file_path, [])
+        ensure_file(self.subscriptions_file_path, [], self.log)
         self.content_file_path = self.data_dir + 'content.json'
-        ensure_file(self.content_file_path, {})
+        ensure_file(self.content_file_path, {}, self.log)
 
         self.model_data_dir = self.data_dir + 'model_data/'
-        ensure_dir(self.model_data_dir)
+        ensure_dir(self.model_data_dir, self.log)
         self.model = PresearcherModel(data_dir=self.model_data_dir)
 
         self.log.info('Running App')
@@ -83,7 +84,7 @@ class PresearcherEnv(object):
 
             feedback_filename = '{base}feedback/{profile}.json'.format(
                                     base=self.data_dir, profile=profile_name)
-            ensure_file(feedback_filename, [])
+            ensure_file(feedback_filename, [], self.log)
 
         else:
             raise ValueError('The profile {name} already exists!'.format(
@@ -110,7 +111,7 @@ class PresearcherEnv(object):
 
         feedback_filename = '{base}feedback/{profile}.json'.format(
                                     base=self.data_dir, profile=profile_name)
-        ensure_file(feedback_filename, {})
+        ensure_file(feedback_filename, {}, self.log)
 
         feedback = _read_file(feedback_filename)
 

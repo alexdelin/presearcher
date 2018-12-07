@@ -5,18 +5,29 @@ import re
 import feedparser
 
 
-def ensure_dir(dir):
+def ensure_dir(dirname, logger=None):
 
-    if not os.path.exists(dir):
-        os.makedirs(dir)
+    if not os.path.exists(dirname):
+        if logger:
+            logger.warn('Creating directory "{dirname}" '
+                        'that does not exist'.format(
+                            dirname=dirname))
+        os.makedirs(dirname)
 
 
-def ensure_file(file_path, default_contents):
+def ensure_file(file_path, default_contents, logger=None):
 
-    if not os.path.exists(os.path.dirname(file_path)):
-        os.makedirs(os.path.dirname(file_path))
+    dirname = os.path.dirname(file_path)
+    if not os.path.exists(dirname):
+        if logger:
+            logger.warn('Creating directory "{dirname}" '
+                        'that does not exist'.format(
+                            dirname=dirname))
+        os.makedirs(dirname)
 
     if not os.path.exists(file_path):
+        logger.warn('Creating file {file_path} that does not exist'.format(
+                        file_path=file_path))
         with open(file_path, 'w') as file_object:
             json.dump(default_contents, file_object)
 
