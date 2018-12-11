@@ -1,4 +1,5 @@
 import os
+import shutil
 
 from presearcher.environment import PresearcherEnv
 
@@ -6,21 +7,10 @@ from presearcher.environment import PresearcherEnv
 TEST_CONFIG_FILE = 'config/presearcher-test.json'
 TEST_DATA_DIR = 'test_data/'
 TEST_PROFILES = ['foo', 'bar', 'baz']
-CONTENT_TO_CLEAN = [
-    'content.json',
-    'profiles.json',
-    'subscriptions.json',
-    'log/api.log',
-    'feedback/foo.json',
-    'feedback/bar.json',
-    'feedback/baz.json'
-]
 
 # Clean out content from previous tests before starting
-for item in CONTENT_TO_CLEAN:
-    full_path = TEST_DATA_DIR + item
-    if os.path.exists(full_path):
-        os.remove(full_path)
+if os.path.exists(TEST_DATA_DIR):
+    shutil.rmtree(TEST_DATA_DIR)
 
 env = PresearcherEnv(TEST_CONFIG_FILE)
 
@@ -62,9 +52,13 @@ class TestBasics(object):
         env.update_content()
         assert env.get_top_content(TEST_PROFILES[0])['content'] != []
 
-
-class TestEndpoints(object):
-    """Test the actual REST API Endpoints do what they are supposed to"""
-
-    def test_placeholder(self):
-        assert True
+    def test_field_mappings(self):
+        content = env.get_top_content(TEST_PROFILES[0])['content']
+        for item in content:
+            assert item.get('title')
+            assert item.get('description')
+            assert item.get('link')
+            assert item.get('timestamp')
+            score = item.get('score')
+            assert isinstance(score, (float, int))
+            assert score >= 0 and score <= 1
