@@ -2,6 +2,8 @@ import os
 from time import mktime
 from datetime import datetime
 from random import shuffle
+import logging
+from logging.handlers import RotatingFileHandler
 
 import feedparser
 import six
@@ -18,19 +20,35 @@ class PresearcherEnv(object):
 
         self.env_config = get_env_config(config_file)
         self.data_dir = self.get_data_dir()
+
+        self.log = logging.getLogger('presearcher_api')
+        self.log.setLevel(logging.DEBUG)
+        # Can't pass the logger in here because it's not instantiated yet
+        ensure_dir('{base_dir}log'.format(base_dir=self.data_dir))
+        log_handler = RotatingFileHandler('{base_dir}log/api.log'.format(
+                                            base_dir=self.data_dir),
+                                          maxBytes=10000,
+                                          backupCount=10)
+        log_formatter = logging.Formatter(
+            '%(asctime)s [%(levelname)s] %(message)s')
+        log_handler.setFormatter(log_formatter)
+        self.log.addHandler(log_handler)
+
         self.time_window = self.env_config.get('time_window', 14)
 
         # Easy access to commonly used files
         self.profiles_file_path = self.data_dir + 'profiles.json'
-        ensure_file(self.profiles_file_path, [])
+        ensure_file(self.profiles_file_path, [], self.log)
         self.subscriptions_file_path = self.data_dir + 'subscriptions.json'
-        ensure_file(self.subscriptions_file_path, [])
+        ensure_file(self.subscriptions_file_path, [], self.log)
         self.content_file_path = self.data_dir + 'content.json'
-        ensure_file(self.content_file_path, {})
+        ensure_file(self.content_file_path, {}, self.log)
 
         self.model_data_dir = self.data_dir + 'model_data/'
-        ensure_dir(self.model_data_dir)
+        ensure_dir(self.model_data_dir, self.log)
         self.model = PresearcherModel(data_dir=self.model_data_dir)
+
+        self.log.info('Running App')
 
     def get_data_dir(self):
 
@@ -66,7 +84,7 @@ class PresearcherEnv(object):
 
             feedback_filename = '{base}feedback/{profile}.json'.format(
                                     base=self.data_dir, profile=profile_name)
-            ensure_file(feedback_filename, [])
+            ensure_file(feedback_filename, [], self.log)
 
         else:
             raise ValueError('The profile {name} already exists!'.format(
@@ -75,7 +93,7 @@ class PresearcherEnv(object):
     def add_subscription(self, subscription_url):
 
         current_subscriptions = _read_file(self.subscriptions_file_path)
-        print('Adding subscription ' + subscription_url)
+        self.log.info('Adding subscription ' + subscription_url)
 
         if not validate_subscription_url(subscription_url):
             raise ValueError('Invalid Subscription URL')
@@ -93,19 +111,46 @@ class PresearcherEnv(object):
 
         feedback_filename = '{base}feedback/{profile}.json'.format(
                                     base=self.data_dir, profile=profile_name)
-        ensure_file(feedback_filename, [])
+        ensure_file(feedback_filename, {}, self.log)
 
         feedback = _read_file(feedback_filename)
+
         if feedback_type in ['pos', 'neg']:
-            feedback.append({
+            feedback_element = {
                 "label": feedback_type,
                 "content": content
-            })
+            }
+
+            feedback_link = feedback_element['content']['link']
+
+            if not feedback_link:
+                raise ValueError('No Link found in Feedback Element {}'.format(
+                    feedback_element['content']))
+
+            if feedback_link in feedback.keys():
+                '''Feedback already exists, check that the
+                label is the same, otherwise replace it with the
+                new label
+                '''
+                if feedback[feedback_link]['label'] == feedback_element['label']:
+                    '''Labels Match. Do nothing because that
+                    exact feedback already exists
+                    '''
+                    pass
+                else:
+                    # Labels do not Match, update it with the new feedback
+                    feedback[feedback_link] = feedback_element
+            else:
+                feedback[feedback_link] = feedback_element
 
         else:
             raise ValueError('Invalid Feedback Type {}'.format(feedback_type))
 
         _write_file(feedback_filename, feedback)
+        self.log.info('Added {feedback_type} feedback for '
+                      'profile {profile_name}'.format(
+                        feedback_type=feedback_type,
+                        profile_name=profile_name))
 
     def update_content(self):
         ''' Fetch Additional Content for all subscriptions
@@ -116,18 +161,20 @@ class PresearcherEnv(object):
         current_content = _read_file(self.content_file_path)
         all_subscriptions = _read_file(self.subscriptions_file_path)
 
-        print('Updating Content')
+        self.log.info('Updating Content')
 
         # Get updated content for every subscription
         for subscription in all_subscriptions:
 
-            print('updating subscription ' + subscription)
+            self.log.info('updating subscription ' + subscription)
 
             subscription_content = self.parse_feed(subscription)
             for item in subscription_content:
 
                 if not item.get('link'):
-                    print('No Link!!!')
+
+                    self.log.warn('No Link in item {content}'.format(
+                                    content=item))
                     continue
 
                 if item['link'] not in current_content.keys():
@@ -147,7 +194,7 @@ class PresearcherEnv(object):
             days_elapsed = time_elapsed.days
 
             if days_elapsed >= self.time_window:
-                print('Item too Old!!!')
+                self.log.info('Item too Old!!!')
                 old_content.append(item_id)
 
         for item in old_content:
@@ -192,6 +239,7 @@ class PresearcherEnv(object):
 
             feed_items.append(parsed_item)
 
+        self.log.info('Updated Feed {url}'.format(url=feed_url))
         return feed_items
 
     def rescore_all_profiles(self):
@@ -200,9 +248,15 @@ class PresearcherEnv(object):
         profile_list = _read_file(self.profiles_file_path)
 
         for profile in profile_list:
-            print('Rescoring profile {}'.format(profile))
+
+            self.log.info('Rescoring profile {}'.format(profile))
+
             error = self.train_from_feedback(profile)
-            if not error:
+            if error:
+                self.log.warn('Got an error training from feedback '
+                              'for profile {profile_name}'.format(
+                                    profile_name=profile))
+            else:
                 self.rescore_profile(profile)
 
         self.update_last_scored_time()
@@ -226,20 +280,21 @@ class PresearcherEnv(object):
                                     base=self.data_dir, profile=profile_name)
         try:
             training_content = _read_file(feedback_filename)
+            training_content = training_content.values()
         except (OSError, IOError):
             raise ValueError('No Feedback file found for profile {}'.format(
                                 profile_name))
         shuffle(training_content)
 
         if not training_content:
-            print('Skipping profile {} because it '
-                  'has no training content'.format(
-                    profile_name))
+            self.log.info('Skipping profile {profile_name} because it '
+                          'has no training content'.format(
+                                profile_name=profile_name))
             return True
 
         self.model.train(training_content)
-        print('Successfully trained on {} examples'.format(
-                        len(training_content)))
+        self.log.info('Successfully trained on {num} examples'.format(
+                        num=len(training_content)))
 
         return False
 
