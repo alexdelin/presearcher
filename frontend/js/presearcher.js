@@ -1,3 +1,15 @@
+$("#fetchSubmit").click(function() {
+    console.log( "Handler for Fetch submit called." );
+
+    $.ajax({
+        type: 'POST',
+        url: '/fetch',
+        success: function() {
+            alert('Fetched New Content!')
+        },
+    });
+});
+
 $("#reScoreSubmit").click(function() {
     console.log( "Handler for ReScore submit called." );
 
