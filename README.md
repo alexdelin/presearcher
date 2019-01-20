@@ -39,3 +39,5 @@ $ python api.py
 ...
  * Running on http://0.0.0.0:8080/ (Press CTRL+C to quit)
 ```
+
+With presearcher running, you can go to the address `http://localhost:8080` in a browser to set up and use presearcher
