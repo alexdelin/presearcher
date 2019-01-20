@@ -1,0 +1,6 @@
+{
+    "data_dir": "~/presearcher_data/",
+    "refresh_interval": 500,
+    "retrain_interval": 86400,
+    "time_window": 14
+}

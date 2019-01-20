@@ -118,7 +118,7 @@ def send_feedback():
 
 # ----- Administration Routes -----
 
-@app.route('/fetch')
+@app.route('/fetch', methods=['POST'])
 def fetch_content():
     # fetch updated content from all subscriptions
     env.update_content()

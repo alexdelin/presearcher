@@ -1,0 +1,5 @@
+Flask>=1.0.0
+feedparser>=5.2.1
+six>=1.12.0
+scikit-learn>=0.20.2
+pytest>=4.0.2
